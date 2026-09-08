@@ -84,6 +84,8 @@ archive.zip
 *.rar
 *.7z
 *.tar.gz
+PressureVisionAI_Experiment3_BestModel/
 
 # Keep models directory structure with gitkeep/config
 !models/pressurevision_exp3_config.json
+
