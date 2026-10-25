@@ -223,14 +223,23 @@ Streamlit will launch a local server accessible via your browser at:
 
 ---
 
-## 12. Explainability & Grad-CAM Future Integration
+## 12. Explainability & Grad-CAM Visual Explainability
 
-> **Note**: Grad-CAM interpretability is currently designated as **Coming Soon / Future Implementation**. Simulated or artificial heatmaps are strictly omitted to maintain diagnostic integrity.
+PressureVision AI features a mathematically rigorous **Grad-CAM (Gradient-weighted Class Activation Mapping)** engine providing transparent, interpretable visual heatmaps for clinical decision support.
 
-### Integration Architecture:
-The `model.py` architecture is already prepared with hook access points for future Grad-CAM integration:
-- **ConvNeXt Hook**: `model.get_convnext_target_layer()` targets `convnext.stages[-1]` to visualize convolutional feature maps highlighting micro-textures, wound edges, and erythema margins.
-- **Swin Hook**: `model.get_swin_target_layer()` targets `swin.layers[-1]` to visualize attention map weights across anatomical regions.
+### 12.1 Visual Explainability Architecture:
+- **Target Backbone**: ConvNeXt-Tiny stage 3 (`model.convnext.stages[-1]`), capturing rich spatial representations ($7 \times 7$, 768 feature maps).
+- **Target Gradient Flow**: Backpropagates class-specific unnormalized logit scores through the hybrid fusion head and dual-backbone adaptive gating module directly to the convolutional feature maps.
+- **Global Average Pooling**: Computes importance weight $\alpha_k^c = \frac{1}{Z}\sum_i \sum_j \frac{\partial y^c}{\partial A_{i,j}^k}$ per feature map, followed by a rectified linear activation ($\text{ReLU}$) to isolate positive diagnostic contributions:
+  $$L_{\text{Grad-CAM}}^c = \text{ReLU}\left(\sum_k \alpha_k^c A^k\right)$$
+- **Overlay Visualization**: Normalizes and bilinear-interpolates heatmaps to full image resolution, blending via customizable colormaps (`turbo`, `jet`, `viridis`, `magma`, `inferno`) and adjustable opacity $\alpha$.
+
+### 12.2 Usage:
+- **Web Dashboard**: An interactive **"Grad-CAM Visual Heatmap"** tab in the Streamlit application displays a synchronous 3-panel comparative view (Original RGB, Activation Heatmap, Blended Overlay) with interactive target class selection and opacity controls.
+- **Standalone CLI Runner**:
+  ```bash
+  python run_gradcam.py --image "path/to/ulcer.jpg" --target_class "Stage_III" --colormap turbo --opacity 0.45 --output gradcam_local_result.png
+  ```
 
 ---
 

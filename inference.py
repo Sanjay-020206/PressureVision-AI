@@ -9,10 +9,14 @@ Inference engine for Pressure Ulcer Stage Classification:
 """
 
 import os
-import torch
-import torchvision.transforms as transforms
+from typing import Any, Dict, List, Optional, Tuple, Union
+import numpy as np
 from PIL import Image
-from typing import Dict, Any, Tuple, Optional, List
+import torch
+import torch.nn.functional as F
+import torchvision.transforms as transforms
+import matplotlib.cm as cm
+import matplotlib.pyplot as plt
 
 from model import PressureVisionAI
 
@@ -245,3 +249,209 @@ def predict_image(
             "swin_weight_percent": alpha_swin_pct
         }
     }
+
+
+# =============================================================================
+# Grad-CAM Visual Explainability Engine
+# =============================================================================
+
+class PressureVisionGradCAM:
+    """
+    Grad-CAM engine for the PressureVision AI hybrid classifier.
+    Computes gradient-weighted class activation maps from the final spatial stage
+    of the ConvNeXt branch (model.convnext.stages[-1]) for the selected class logit
+    of the complete hybrid model.
+    """
+    def __init__(
+        self,
+        model: PressureVisionAI,
+        target_layer: Optional[torch.nn.Module] = None,
+        device: Optional[torch.device] = None,
+        transform: Optional[transforms.Compose] = None
+    ):
+        self.model = model
+        self.device = device or next(model.parameters()).device
+        self.model.to(self.device)
+        self.model.eval()
+        
+        # Target layer: final spatial feature representation of ConvNeXt-Tiny (Stage 3)
+        self.target_layer = target_layer or self.model.convnext.stages[-1]
+        self.transform = transform or get_inference_transform()
+        
+        self._activations: Optional[torch.Tensor] = None
+        self._gradients: Optional[torch.Tensor] = None
+        self._hooks: List[Any] = []
+
+    def _save_activation(self, module: torch.nn.Module, input: Any, output: torch.Tensor):
+        self._activations = output
+
+    def _save_gradient(self, grad: torch.Tensor):
+        self._gradients = grad
+
+    def _register_hooks(self):
+        self._cleanup_hooks()
+        handle = self.target_layer.register_forward_hook(self._save_activation)
+        self._hooks.append(handle)
+
+    def _cleanup_hooks(self):
+        for h in self._hooks:
+            try:
+                h.remove()
+            except Exception:
+                pass
+        self._hooks.clear()
+
+    def generate(
+        self,
+        image: Image.Image,
+        target_class: Optional[Union[int, str]] = None,
+        overlay_opacity: float = 0.45,
+        colormap_name: str = "turbo"
+    ) -> Dict[str, Any]:
+        """
+        Calculates Grad-CAM for a given PIL image.
+        
+        Args:
+            image: Input PIL Image in RGB format.
+            target_class: Class name or integer index to explain. If None, explains predicted class.
+            overlay_opacity: Heatmap overlay blending weight (0.0 to 1.0).
+            colormap_name: Colormap name ('turbo', 'jet', 'viridis', etc.).
+            
+        Returns:
+            Dictionary containing prediction data, raw heatmap, colored heatmap PIL, and overlay PIL.
+        """
+        if image.mode != "RGB":
+            image = image.convert("RGB")
+
+        orig_w, orig_h = image.size
+        orig_np = np.array(image)
+
+        input_tensor = self.transform(image).unsqueeze(0).to(self.device)
+
+        self._register_hooks()
+        try:
+            self.model.zero_grad(set_to_none=True)
+
+            with torch.set_grad_enabled(True):
+                logits = self.model(input_tensor)
+                probabilities = F.softmax(logits, dim=1).squeeze(0)
+                pred_idx = torch.argmax(probabilities).item()
+
+                if target_class is None:
+                    target_idx = pred_idx
+                elif isinstance(target_class, str):
+                    if target_class in RAW_CLASS_NAMES:
+                        target_idx = RAW_CLASS_NAMES.index(target_class)
+                    elif target_class in DISPLAY_CLASS_NAMES:
+                        target_idx = DISPLAY_CLASS_NAMES.index(target_class)
+                    else:
+                        raise ValueError(f"Unknown class '{target_class}'. Must be one of {DISPLAY_CLASS_NAMES}")
+                else:
+                    target_idx = int(target_class)
+                    if target_idx < 0 or target_idx >= len(RAW_CLASS_NAMES):
+                        raise IndexError(f"Target index {target_idx} out of range [0, 6]")
+
+                act = self._activations
+                if act is None:
+                    raise RuntimeError("Failed to capture activations from target layer.")
+
+                act.register_hook(self._save_gradient)
+
+                # Differentiate unnormalized class logit score
+                class_score = logits[0, target_idx]
+                class_score.backward(retain_graph=False)
+
+            grads = self._gradients
+            if grads is None:
+                raise RuntimeError("Failed to capture gradients for target layer.")
+
+            # Spatial Global Average Pooling of gradients (alpha importance weights)
+            # Shape of act and grads: [1, 768, 7, 7]
+            weights = torch.mean(grads, dim=(2, 3), keepdim=True)  # [1, 768, 1, 1]
+
+            # Weighted sum of feature maps
+            cam = torch.sum(weights * act, dim=1, keepdim=True)  # [1, 1, 7, 7]
+
+            # Apply ReLU to retain only positive contributions
+            cam = F.relu(cam)
+
+            cam_2d = cam.squeeze().detach().cpu().numpy()
+
+            # Normalize to [0, 1]
+            c_min, c_max = float(np.min(cam_2d)), float(np.max(cam_2d))
+            if c_max - c_min > 1e-8:
+                norm_cam = (cam_2d - c_min) / (c_max - c_min)
+            else:
+                norm_cam = np.zeros_like(cam_2d)
+
+            # Resize to original image size
+            heatmap_pil = Image.fromarray((norm_cam * 255.0).astype(np.uint8)).resize(
+                (orig_w, orig_h),
+                resample=Image.BILINEAR
+            )
+            heatmap_resized = np.array(heatmap_pil, dtype=np.float32) / 255.0
+
+            # Colormap
+            try:
+                cmap = plt.colormaps.get_cmap(colormap_name)
+            except AttributeError:
+                cmap = cm.get_cmap(colormap_name)
+
+            colored_heatmap = cmap(heatmap_resized)[:, :, :3]
+            colored_heatmap_uint8 = np.uint8(np.clip(colored_heatmap * 255.0, 0, 255))
+
+            # Blend with original image
+            alpha = float(np.clip(overlay_opacity, 0.0, 1.0))
+            overlay_uint8 = np.uint8(np.clip((1.0 - alpha) * orig_np + alpha * colored_heatmap_uint8, 0, 255))
+
+            colored_heatmap_pil = Image.fromarray(colored_heatmap_uint8)
+            overlay_pil = Image.fromarray(overlay_uint8)
+
+            prob_list = probabilities.detach().cpu().numpy().tolist()
+
+            return {
+                "predicted_class": DISPLAY_CLASS_NAMES[pred_idx],
+                "predicted_class_raw": RAW_CLASS_NAMES[pred_idx],
+                "predicted_index": pred_idx,
+                "confidence": float(prob_list[pred_idx]),
+                "confidence_percentage": float(prob_list[pred_idx]) * 100.0,
+                "target_class": DISPLAY_CLASS_NAMES[target_idx],
+                "target_class_raw": RAW_CLASS_NAMES[target_idx],
+                "target_index": target_idx,
+                "probabilities": {DISPLAY_CLASS_NAMES[i]: float(p) for i, p in enumerate(prob_list)},
+                "heatmap_raw": norm_cam,
+                "heatmap_resized": heatmap_resized,
+                "colored_heatmap_pil": colored_heatmap_pil,
+                "overlay_pil": overlay_pil,
+                "activation_shape": list(act.shape),
+                "gradient_shape": list(grads.shape)
+            }
+
+        finally:
+            self._cleanup_hooks()
+            self._activations = None
+            self._gradients = None
+            self.model.zero_grad(set_to_none=True)
+
+
+def generate_gradcam(
+    model: PressureVisionAI,
+    image: Image.Image,
+    device: Optional[torch.device] = None,
+    target_class: Optional[Union[int, str]] = None,
+    overlay_opacity: float = 0.45,
+    colormap_name: str = "turbo"
+) -> Dict[str, Any]:
+    """
+    Convenience function to generate a Grad-CAM explanation for an image.
+    """
+    if device is None:
+        device = next(model.parameters()).device
+    engine = PressureVisionGradCAM(model=model, device=device)
+    return engine.generate(
+        image=image,
+        target_class=target_class,
+        overlay_opacity=overlay_opacity,
+        colormap_name=colormap_name
+    )
+

@@ -21,6 +21,7 @@ from typing import Dict, Any, List, Optional
 from inference import (
     load_model,
     predict_image,
+    generate_gradcam,
     get_device,
     DISPLAY_CLASS_NAMES,
     RAW_CLASS_NAMES,
@@ -460,6 +461,8 @@ if error_msg:
 # =============================================================================
 if "prediction_result" not in st.session_state:
     st.session_state.prediction_result = None
+if "gradcam_result" not in st.session_state:
+    st.session_state.gradcam_result = None
 if "uploaded_image" not in st.session_state:
     st.session_state.uploaded_image = None
 if "image_filename" not in st.session_state:
@@ -530,6 +533,7 @@ with tab_inspect:
                     st.session_state.uploaded_image = s_img
                     st.session_state.image_filename = os.path.basename(sample_file_path)
                     st.session_state.prediction_result = None
+                    st.session_state.gradcam_result = None
                     st.rerun()
                 except Exception as e:
                     st.warning(f"Failed to load sample: {str(e)}")
@@ -550,6 +554,7 @@ with tab_inspect:
         if run_reset:
             st.session_state.uploaded_image = None
             st.session_state.prediction_result = None
+            st.session_state.gradcam_result = None
             st.session_state.image_filename = None
             st.rerun()
 
@@ -720,6 +725,33 @@ with tab_inspect:
             """
             render_html(full_spectrum_html)
 
+            # Instant Grad-CAM Explainability Preview in Tab 1
+            st.markdown("<hr style='border-color:rgba(255,255,255,0.06);margin:1.6rem 0;'>", unsafe_allow_html=True)
+            with st.expander("🔍 View Instant ConvNeXt Grad-CAM Explainability Overlay", expanded=False):
+                with st.spinner("Backpropagating gradients to generate visual heatmap..."):
+                    try:
+                        instant_cam = generate_gradcam(
+                            model=model,
+                            image=curr_image,
+                            device=device,
+                            target_class=None,
+                            overlay_opacity=0.45,
+                            colormap_name="turbo"
+                        )
+                        c_cam_p1, c_cam_p2, c_cam_p3 = st.columns(3)
+                        with c_cam_p1:
+                            st.caption(f"1. Original Photograph ({w_px} × {h_px} px)")
+                            st.image(curr_image, use_container_width=True)
+                        with c_cam_p2:
+                            st.caption("2. ConvNeXt Heatmap (Stage 3)")
+                            st.image(instant_cam["colored_heatmap_pil"], use_container_width=True)
+                        with c_cam_p3:
+                            st.caption(f"3. Overlay ({instant_cam['predicted_class']})")
+                            st.image(instant_cam["overlay_pil"], use_container_width=True)
+                        st.caption("💡 *For custom target class explanations, opacity tuning, and colormaps, open the **🔍 Explainability (Grad-CAM)** tab above.*")
+                    except Exception as e_cam:
+                        st.warning(f"Grad-CAM preview notice: {str(e_cam)}")
+
     else:
         # Standby View when No Image is Loaded
         render_html("""
@@ -800,54 +832,180 @@ with tab_arch:
 # =============================================================================
 with tab_explain:
     render_html("""
-    <div class="glass-panel">
-        <div style="font-size:1.25rem;font-weight:800;color:#F8FAFC;margin-bottom:0.6rem;">
-            🔍 Visual Explainability & Interpretation Roadmap
+    <div class="glass-panel" style="margin-bottom: 1.5rem;">
+        <div style="font-size:1.25rem;font-weight:800;color:#F8FAFC;margin-bottom:0.4rem;">
+            🔍 Grad-CAM Visual Explainability Engine
         </div>
-        <p style="color:#CBD5E1;font-size:0.92rem;line-height:1.65;margin-bottom:1.5rem;">
-            To ensure clinical trustworthiness and diagnostic transparency, model explainability modules 
-            are scheduled for integration in upcoming release cycles.
+        <p style="color:#CBD5E1;font-size:0.92rem;line-height:1.6;margin-bottom:0.2rem;">
+            Gradient-weighted Class Activation Mapping (Grad-CAM) visualizes the spatial focus of the 
+            <strong>ConvNeXt-Tiny local feature extraction branch</strong> (Stage 3: 768 channels, 7&times;7 feature grid) 
+            w.r.t the unnormalized logit score of the complete PressureVision AI hybrid model.
         </p>
-
-        <div class="explain-card">
-            <span style="background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.3);color:#FBBF24;font-size:0.75rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:0.3rem 0.75rem;border-radius:9999px;display:inline-block;margin-bottom:0.8rem;">
-                Future Implementation Roadmap
-            </span>
-            <div style="font-size:1.35rem;font-weight:800;color:#F8FAFC;margin-bottom:0.6rem;">
-                Layer-Wise Grad-CAM & Attention Heatmaps
-            </div>
-            <p style="font-size:0.9rem;color:#94A3B8;max-width:700px;margin:0 auto 1.2rem auto;line-height:1.6;">
-                Gradient-weighted Class Activation Mapping (Grad-CAM) will highlight exact pixels, wound margins, 
-                and necrotic tissue pockets contributing to the model's staging classification.
-            </p>
-            <div style="display:flex;justify-content:center;gap:1.5rem;flex-wrap:wrap;font-size:0.82rem;color:#64748B;">
-                <span>🔹 ConvNeXt Hook: <code>model.convnext.stages[-1]</code></span>
-                <span>🔹 Swin Hook: <code>model.swin.layers[-1]</code></span>
-            </div>
-        </div>
-
-        <div style="margin-top:1.5rem;display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;">
-            <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;">
-                <div style="font-size:0.88rem;font-weight:700;color:#10B981;margin-bottom:0.4rem;">✓ Active Capabilities</div>
-                <ul style="font-size:0.84rem;color:#94A3B8;line-height:1.7;margin:0;padding-left:1.2rem;">
-                    <li>Live 7-class softmax probability distribution</li>
-                    <li>Dual-backbone adaptive gating weight telemetry</li>
-                    <li>Multi-format RGB photograph validation</li>
-                    <li>Sub-second neural forward pass execution</li>
-                </ul>
-            </div>
-            <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;">
-                <div style="font-size:0.88rem;font-weight:700;color:#38BDF8;margin-bottom:0.4rem;">→ In Development</div>
-                <ul style="font-size:0.84rem;color:#94A3B8;line-height:1.7;margin:0;padding-left:1.2rem;">
-                    <li>Dual-backbone cross-attention visual heatmaps</li>
-                    <li>Wound surface area and diameter estimation</li>
-                    <li>Longitudinal healing trajectory comparison</li>
-                    <li>Electronic Health Record (EHR) export module</li>
-                </ul>
-            </div>
-        </div>
     </div>
     """)
+
+    if st.session_state.uploaded_image is None:
+        render_html("""
+        <div style="background:rgba(15,23,42,0.4);border:2px dashed rgba(255,255,255,0.08);border-radius:18px;padding:3.5rem 2rem;text-align:center;">
+            <div style="font-size:2.5rem;margin-bottom:0.75rem;">🩺</div>
+            <h4 style="color:#F8FAFC;font-weight:700;margin-bottom:0.4rem;">No Ulcer Photograph Loaded</h4>
+            <p style="color:#94A3B8;max-width:520px;margin:0 auto 1.2rem auto;font-size:0.9rem;line-height:1.6;">
+                Please upload a wound photograph or pick a clinical reference case in the 
+                <strong>🔬 Wound Analysis & Staging</strong> tab to generate Grad-CAM heatmaps.
+            </p>
+        </div>
+        """)
+    else:
+        cam_img = st.session_state.uploaded_image
+        
+        # Interactive Controls
+        render_html("<div style='font-size:1rem;font-weight:700;color:#38BDF8;margin-bottom:0.8rem;'>🎛️ Grad-CAM Configuration</div>")
+        
+        c_cam_ctrl1, c_cam_ctrl2, c_cam_ctrl3, c_cam_btn = st.columns([1.5, 1.2, 1.2, 1.4], gap="medium")
+        
+        # Determine default target class based on current prediction
+        pred_label = "Stage III"
+        if st.session_state.prediction_result is not None:
+            pred_label = st.session_state.prediction_result["predicted_class"]
+            
+        class_options = [f"Predicted Class ({pred_label})"] + DISPLAY_CLASS_NAMES
+        
+        with c_cam_ctrl1:
+            sel_target = st.selectbox(
+                "Target Class to Explain",
+                options=class_options,
+                index=0,
+                help="Class score whose gradient determines the activation map."
+            )
+            
+        with c_cam_ctrl2:
+            cam_opacity = st.slider(
+                "Overlay Opacity (α)",
+                min_value=0.10,
+                max_value=0.90,
+                value=0.45,
+                step=0.05,
+                help="Blending opacity between original RGB image and colored activation map."
+            )
+            
+        with c_cam_ctrl3:
+            cam_cmap = st.selectbox(
+                "Colormap",
+                options=["turbo", "jet", "plasma", "inferno", "viridis"],
+                index=0,
+                help="Color map palette for intensity rendering."
+            )
+            
+        with c_cam_btn:
+            st.markdown("<div style='height: 1.7rem;'></div>", unsafe_allow_html=True)
+            compute_cam_clicked = st.button("⚡ Compute Grad-CAM", type="primary", use_container_width=True)
+
+        # Parse target class
+        if sel_target.startswith("Predicted Class"):
+            chosen_target = None
+        else:
+            chosen_target = sel_target
+
+        # Check if we need to auto-generate or user clicked compute
+        should_compute = compute_cam_clicked or (st.session_state.gradcam_result is None)
+
+        if should_compute:
+            with st.spinner("Backpropagating gradients through hybrid architecture to ConvNeXt Stage 3..."):
+                try:
+                    t_cam_start = time.time()
+                    cam_res = generate_gradcam(
+                        model=model,
+                        image=cam_img,
+                        device=device,
+                        target_class=chosen_target,
+                        overlay_opacity=cam_opacity,
+                        colormap_name=cam_cmap
+                    )
+                    cam_res["latency_ms"] = (time.time() - t_cam_start) * 1000.0
+                    st.session_state.gradcam_result = cam_res
+                except Exception as ex:
+                    st.error(f"Grad-CAM error: {str(ex)}")
+
+        # Render 3-Panel Inspection if result exists
+        if st.session_state.gradcam_result is not None:
+            res = st.session_state.gradcam_result
+            
+            st.markdown("<hr style='border-color:rgba(255,255,255,0.06);margin:1.4rem 0;'>", unsafe_allow_html=True)
+            
+            # Status Banner
+            render_html(f"""
+            <div style="background:rgba(15,23,42,0.7);border:1px solid rgba(56,189,248,0.25);border-radius:14px;padding:0.9rem 1.4rem;margin-bottom:1.4rem;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem;">
+                <div style="display:flex;align-items:center;gap:1.2rem;">
+                    <span style="font-size:1.4rem;">🎯</span>
+                    <div>
+                        <div style="font-size:0.78rem;font-weight:700;color:#94A3B8;text-transform:uppercase;">Class Explanation Target</div>
+                        <div style="font-size:1.15rem;font-weight:800;color:#38BDF8;">{res['target_class']}</div>
+                    </div>
+                </div>
+                <div style="display:flex;gap:1.8rem;font-size:0.82rem;color:#CBD5E1;">
+                    <div>Prediction: <strong style="color:#F8FAFC;">{res['predicted_class']} ({res['confidence_percentage']:.1f}%)</strong></div>
+                    <div>Target Module: <strong style="color:#38BDF8;">model.convnext.stages[-1]</strong></div>
+                    <div>Activation Grid: <strong style="color:#34D399;">7 &times; 7 (768-D)</strong></div>
+                    <div>Latency: <strong style="color:#FBBF24;">{res.get('latency_ms', 0.0):.1f} ms</strong></div>
+                </div>
+            </div>
+            """)
+
+            # 3-Panel Display
+            p1_col, p2_col, p3_col = st.columns(3, gap="medium")
+            
+            with p1_col:
+                render_html("""
+                <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1rem;text-align:center;">
+                    <div style="font-size:0.85rem;font-weight:700;color:#94A3B8;text-transform:uppercase;margin-bottom:0.6rem;">1. Original RGB Input</div>
+                """)
+                st.image(cam_img, use_container_width=True)
+                w_px, h_px = cam_img.size
+                render_html(f"""
+                    <div style="font-size:0.75rem;color:#64748B;margin-top:0.5rem;">{w_px} &times; {h_px} px &bull; Input Resolution</div>
+                </div>
+                """)
+
+            with p2_col:
+                render_html(f"""
+                <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1rem;text-align:center;">
+                    <div style="font-size:0.85rem;font-weight:700;color:#38BDF8;text-transform:uppercase;margin-bottom:0.6rem;">2. ConvNeXt Activation Heatmap</div>
+                """)
+                st.image(res["colored_heatmap_pil"], use_container_width=True)
+                render_html(f"""
+                    <div style="font-size:0.75rem;color:#64748B;margin-top:0.5rem;">Normalized [0.0, 1.0] &bull; Colormap: <code>{cam_cmap}</code></div>
+                </div>
+                """)
+
+            with p3_col:
+                render_html(f"""
+                <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(56,189,248,0.2);border-radius:14px;padding:1rem;text-align:center;">
+                    <div style="font-size:0.85rem;font-weight:700;color:#34D399;text-transform:uppercase;margin-bottom:0.6rem;">3. Blended Overlay</div>
+                """)
+                st.image(res["overlay_pil"], use_container_width=True)
+                render_html(f"""
+                    <div style="font-size:0.75rem;color:#64748B;margin-top:0.5rem;">Alpha blend (α = {cam_opacity:.2f}) &bull; Focused spatial regions</div>
+                </div>
+                """)
+
+            # Mathematical Formulation & Explainability Limitation Notice
+            render_html("""
+            <div style="margin-top:1.5rem;background:rgba(15,23,42,0.5);border:1px solid rgba(255,255,255,0.06);border-radius:14px;padding:1.2rem;">
+                <div style="font-size:0.9rem;font-weight:700;color:#F8FAFC;margin-bottom:0.6rem;">
+                    📐 Gradient-Weighted Formulation & Clinical Interpretability Notice
+                </div>
+                <div style="font-size:0.84rem;color:#94A3B8;line-height:1.7;">
+                    The activation map is calculated via spatial Global Average Pooling of backpropagated gradients:
+                    <br>
+                    <code style="color:#38BDF8;">α<sub>k</sub><sup>c</sup> = (1 / (H &times; W)) &sum;<sub>i</sub> &sum;<sub>j</sub> (∂y<sup>c</sup> / ∂A<sub>i,j</sub><sup>k</sup>)</code>
+                    &nbsp;&nbsp;&bull;&nbsp;&nbsp;
+                    <code style="color:#34D399;">L<sub>Grad-CAM</sub><sup>c</sup> = ReLU(&sum;<sub>k</sub> α<sub>k</sub><sup>c</sup> A<sup>k</sup>)</code>
+                    <br><br>
+                    <strong style="color:#FBBF24;">⚠️ Clinical Decision-Support Notice:</strong>
+                    This visualization illustrates the local textural and morphological cues in the ConvNeXt branch that influenced the full hybrid model's unnormalized logit score for the target class. It does <em>not</em> represent histological depth, clinical wound edge margin delineation, or automated surgical boundaries.
+                </div>
+            </div>
+            """)
 
 
 # =============================================================================

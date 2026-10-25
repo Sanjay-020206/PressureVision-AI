@@ -86,6 +86,9 @@ archive.zip
 *.tar.gz
 PressureVisionAI_Experiment3_BestModel/
 
+# Generated Grad-CAM output samples / test runs
+gradcam_*.png
+
 # Keep models directory structure with gitkeep/config
 !models/pressurevision_exp3_config.json
 
