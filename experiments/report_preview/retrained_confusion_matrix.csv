@@ -1,0 +1,8 @@
+,Invalid,SDTI,Stage_I,Stage_II,Stage_III,Stage_IV,Unstageable
+Invalid,43,0,1,0,0,0,0
+SDTI,0,42,1,0,0,0,0
+Stage_I,0,0,40,3,0,0,0
+Stage_II,0,0,2,53,2,0,0
+Stage_III,0,0,0,2,46,3,0
+Stage_IV,0,0,0,0,5,54,1
+Unstageable,0,0,0,0,0,2,42

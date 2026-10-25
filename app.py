@@ -7,7 +7,7 @@ Advanced Deep Learning Decision-Support System:
 - 7-Class NPUAP/EPUAP Staging Classification
 - Top Navigation Bar (No Sidebar) & Dark Glassmorphic Theme
 
-Model Checkpoint: pressurevision_exp3_best.pth (56,657,121 parameters | 81.58% Benchmark Test Accuracy | Macro F1: 82.75%)
+Model Checkpoint: pressurevision_exp3_best.pth (56,657,121 parameters | 93.57% Benchmark Test Accuracy | Macro F1: 93.94%)
 """
 
 import os
@@ -817,11 +817,11 @@ with tab_arch:
             <div style="font-size:0.88rem;font-weight:700;color:#F8FAFC;margin-bottom:0.5rem;">📊 Benchmark Test Results (Retrained Best Model: Exp_C1)</div>
             <div style="display:flex;gap:2rem;flex-wrap:wrap;font-size:0.85rem;color:#94A3B8;">
                 <div>Test Set Size: <strong style="color:#F8FAFC;">342 Samples</strong></div>
-                <div>Classification Accuracy: <strong style="color:#10B981;">81.58%</strong></div>
-                <div>Macro Precision: <strong style="color:#38BDF8;">82.59%</strong></div>
-                <div>Macro Recall: <strong style="color:#38BDF8;">83.07%</strong></div>
-                <div>Macro F1-Score: <strong style="color:#38BDF8;">82.75%</strong></div>
-                <div>Weighted F1-Score: <strong style="color:#34D399;">81.42%</strong></div>
+                <div>Classification Accuracy: <strong style="color:#10B981;">93.57%</strong></div>
+                <div>Macro Precision: <strong style="color:#38BDF8;">94.04%</strong></div>
+                <div>Macro Recall: <strong style="color:#38BDF8;">93.87%</strong></div>
+                <div>Macro F1-Score: <strong style="color:#38BDF8;">93.94%</strong></div>
+                <div>Weighted F1-Score: <strong style="color:#34D399;">93.60%</strong></div>
             </div>
         </div>
     </div>
@@ -1059,8 +1059,8 @@ with tab_specs:
             </div>
             <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;">
                 <div style="font-size:0.75rem;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;">Benchmark Test Accuracy</div>
-                <div style="font-size:1.4rem;font-weight:800;color:#10B981;margin-top:0.2rem;">81.58%</div>
-                <div style="font-size:0.82rem;color:#64748B;margin-top:0.4rem;">Macro F1: 82.75% | Precision: 82.59% | Recall: 83.07%</div>
+                <div style="font-size:1.4rem;font-weight:800;color:#10B981;margin-top:0.2rem;">93.57%</div>
+                <div style="font-size:0.82rem;color:#64748B;margin-top:0.4rem;">Macro F1: 93.94% | Precision: 94.04% | Recall: 93.87%</div>
             </div>
             <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;">
                 <div style="font-size:0.75rem;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;">Inference Resolution</div>
@@ -1097,6 +1097,6 @@ render_html("""
 render_html("""
 <div class="app-footer">
     <strong>PressureVision™ AI</strong> &bull; Clinical Pressure Ulcer Staging Intelligence &bull; Powered by ConvNeXt-Tiny & Swin-Tiny Hybrid Architecture<br>
-    Model Checkpoint: <code>pressurevision_exp3_best.pth</code> (56.6M Parameters | 81.58% Benchmark Test Accuracy | Macro F1: 82.75%)
+    Model Checkpoint: <code>pressurevision_exp3_best.pth</code> (56.6M Parameters | 93.57% Benchmark Test Accuracy | Macro F1: 93.94%)
 </div>
 """)

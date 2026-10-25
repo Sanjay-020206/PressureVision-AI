@@ -1,0 +1,61 @@
+{
+  "project": "PressureVision AI",
+  "checkpoint_file": "models/pressurevision_retrained_best.pth",
+  "experiment_name": "Exp_C1_Regularized_Dropout0.35",
+  "description": "Fine-Tuning Experiment: Tuned dropout 0.35, weight decay 1.2e-4 with augmented dataset and Focal Loss",
+  "architecture": {
+    "convnext_backbone": "convnext_tiny.fb_in22k_ft_in1k",
+    "swin_backbone": "swin_tiny_patch4_window7_224.ms_in1k",
+    "fusion": "Adaptive Gated Feature Fusion",
+    "fusion_dim": 512,
+    "gate_hidden_dim": 256,
+    "dropout": 0.35,
+    "num_classes": 7,
+    "classes": [
+      "Invalid",
+      "SDTI",
+      "Stage_I",
+      "Stage_II",
+      "Stage_III",
+      "Stage_IV",
+      "Unstageable"
+    ]
+  },
+  "training_hyperparameters": {
+    "optimizer": "AdamW",
+    "learning_rate": 0.0002,
+    "weight_decay": 0.00012,
+    "scheduler": "CosineAnnealingLR (eta_min=1e-6)",
+    "epochs": 40,
+    "batch_size": 32,
+    "loss_function": "FocalLoss (gamma=1.5, class_weighted=True)",
+    "data_augmentation": "5x clinical expansion (horizontal flip, +/-8 deg rotation, subtle jitter)",
+    "training_samples": 8045,
+    "validation_samples": 345,
+    "test_samples": 342
+  },
+  "best_validation_results": {
+    "val_accuracy": 0.8579710144927536,
+    "val_macro_f1": 0.8635131715535829
+  },
+  "test_results": {
+    "accuracy": 0.8157894736842105,
+    "macro_precision": 0.8258713504895485,
+    "macro_recall": 0.8307113231405836,
+    "macro_f1": 0.827462311613716,
+    "weighted_precision": 0.8143869241587754,
+    "weighted_recall": 0.8157894736842105,
+    "weighted_f1": 0.8141696294067478,
+    "balanced_accuracy": 0.8307113231405836,
+    "roc_auc_macro": 0.9605083281755346,
+    "roc_auc_weighted": 0.9564766118726554
+  },
+  "baseline_comparison": {
+    "baseline_accuracy": 0.7924,
+    "baseline_macro_f1": 0.8062,
+    "baseline_weighted_f1": 0.7908,
+    "delta_accuracy": 0.023389473684210516,
+    "delta_macro_f1": 0.021262311613715945,
+    "delta_weighted_f1": 0.023369629406747805
+  }
+}

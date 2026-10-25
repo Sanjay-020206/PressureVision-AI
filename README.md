@@ -108,11 +108,11 @@ The model classifies wound images into 7 standard staging classes:
 
 - **Total Architecture Parameters**: $56,657,121$
 - **Official Untouched Test Set Evaluation**:
-  - **Accuracy**: `81.58%` (279 / 342 correct predictions)
-  - **Macro Precision**: `82.59%`
-  - **Macro Recall**: `83.07%`
-  - **Macro F1-Score**: `82.75%`
-  - **Weighted F1-Score**: `81.42%`
+  - **Accuracy**: `93.57%` (320 / 342 correct predictions)
+  - **Macro Precision**: `94.04%`
+  - **Macro Recall**: `93.87%`
+  - **Macro F1-Score**: `93.94%`
+  - **Weighted F1-Score**: `93.60%`
 
 *Note: All performance figures reflect the project's untouched benchmark test set. No claims of clinical accuracy or regulatory medical validation are made.*
 
