@@ -72,19 +72,34 @@ PressureVision AI leverages two complementary neural network backbones to captur
 
 ## 3. Adaptive Feature Fusion
 
-Rather than applying naive concatenation or element-wise addition, PressureVision AI employs an **Adaptive Gated Feature Fusion** mechanism.
+Rather than applying naive concatenation or element-wise addition, PressureVision AI employs an **Adaptive Gated Feature Fusion** mechanism to dynamically balance local textures and global spatial context.
 
-1. Both backbone feature vectors are projected into a unified embedding space:
-   $$\mathbf{z}_{\text{convnext}} = \text{LayerNorm}(\mathbf{W}_c \mathbf{x}_{\text{convnext}} + \mathbf{b}_c) \in \mathbb{R}^{512}$$
-   $$\mathbf{z}_{\text{swin}} = \text{LayerNorm}(\mathbf{W}_s \mathbf{x}_{\text{swin}} + \mathbf{b}_s) \in \mathbb{R}^{512}$$
+### 1. Feature Projection
+Both backbone feature representations are projected into a unified 512-dimensional embedding space:
 
-2. The projected vectors are concatenated $[\mathbf{z}_{\text{convnext}} \,\|\, \mathbf{z}_{\text{swin}}] \in \mathbb{R}^{1024}$ and passed through a learnable MLP gating network:
-   $$\boldsymbol{\alpha} = \sigma\left(\mathbf{W}_2 \cdot \text{GELU}(\mathbf{W}_1 [\mathbf{z}_{\text{convnext}} \,\|\, \mathbf{z}_{\text{swin}}] + \mathbf{b}_1) + \mathbf{b}_2\right) \in (0, 1)^{512}$$
+$$
+\mathbf{z}_{\text{convnext}} = \text{LayerNorm}(\mathbf{W}_c \mathbf{x}_{\text{convnext}} + \mathbf{b}_c) \in \mathbb{R}^{512}
+$$
 
-3. The final fused representation $\mathbf{F} \in \mathbb{R}^{512}$ is computed via channel-wise adaptive gating:
-   $$\mathbf{F} = \boldsymbol{\alpha} \odot \mathbf{z}_{\text{convnext}} + (1 - \boldsymbol{\alpha}) \odot \mathbf{z}_{\text{swin}}$$
+$$
+\mathbf{z}_{\text{swin}} = \text{LayerNorm}(\mathbf{W}_s \mathbf{x}_{\text{swin}} + \mathbf{b}_s) \in \mathbb{R}^{512}
+$$
 
-This enables the model to dynamically prioritize convolutional texture features or transformer contextual features on a per-channel and per-image basis.
+### 2. Learnable Gating Network
+The projected representations are concatenated and passed through a two-layer gating MLP with GELU non-linearity:
+
+$$
+\boldsymbol{\alpha} = \sigma\left(\mathbf{W}_2 \cdot \text{GELU}(\mathbf{W}_1 [\mathbf{z}_{\text{convnext}} \,\|\, \mathbf{z}_{\text{swin}}] + \mathbf{b}_1) + \mathbf{b}_2\right) \in (0, 1)^{512}
+$$
+
+### 3. Channel-Wise Adaptive Gating
+The final unified representation $\mathbf{F} \in \mathbb{R}^{512}$ is computed via channel-wise adaptive gating:
+
+$$
+\mathbf{F} = \boldsymbol{\alpha} \odot \mathbf{z}_{\text{convnext}} + (1 - \boldsymbol{\alpha}) \odot \mathbf{z}_{\text{swin}}
+$$
+
+This enables the model to dynamically prioritize convolutional texture features (e.g., granulation tissue, necrotic slough) or transformer contextual features (e.g., anatomical location, surrounding erythema) on a per-channel and per-image basis.
 
 ---
 
