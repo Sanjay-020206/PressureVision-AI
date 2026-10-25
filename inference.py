@@ -17,6 +17,7 @@ import torch.nn.functional as F
 import torchvision.transforms as transforms
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
+from huggingface_hub import hf_hub_download
 
 from model import PressureVisionAI
 
@@ -83,24 +84,38 @@ def get_device() -> Tuple[torch.device, Dict[str, str]]:
     return device, device_info
 
 
-def find_checkpoint_path() -> Optional[str]:
+def find_checkpoint_path() -> str:
     """
-    Searches standard project paths for the trained checkpoint file.
+    Locates trained checkpoint: checks local models directory first,
+    then fallback directory, and falls back to downloading from Hugging Face Hub.
     """
+    base_dir = os.path.dirname(os.path.abspath(__file__))
+
     candidates = [
-        os.path.join(os.path.dirname(__file__), "models", "pressurevision_exp3_best.pth"),
-        os.path.join("models", "pressurevision_exp3_best.pth"),
-        os.path.join(os.path.dirname(__file__), "PressureVisionAI_Experiment3_BestModel", "pressurevision_exp3_best.pth"),
-        os.path.join("PressureVisionAI_Experiment3_BestModel", "pressurevision_exp3_best.pth"),
-        os.path.abspath("models/pressurevision_exp3_best.pth"),
-        os.path.abspath("PressureVisionAI_Experiment3_BestModel/pressurevision_exp3_best.pth")
+        os.path.join(base_dir, "models", "pressurevision_exp3_best.pth"),
+        os.path.join(base_dir, "PressureVisionAI_Experiment3_BestModel", "pressurevision_exp3_best.pth")
     ]
-    
+
     for path in candidates:
         if os.path.isfile(path):
             return os.path.abspath(path)
-            
-    return None
+
+    repo_id = os.getenv(
+        "HF_MODEL_REPO_ID",
+        "Sanjay020206/PressureVision-AI"
+    )
+
+    try:
+        return hf_hub_download(
+            repo_id=repo_id,
+            filename="pressurevision_exp3_best.pth",
+            repo_type="model"
+        )
+    except Exception as e:
+        raise RuntimeError(
+            f"Unable to download the PressureVision AI checkpoint "
+            f"from Hugging Face repository {repo_id}: {e}"
+        ) from e
 
 
 def get_inference_transform() -> transforms.Compose:
@@ -129,12 +144,15 @@ def load_model(checkpoint_path: Optional[str] = None) -> Tuple[Optional[Pressure
     device, device_info = get_device()
     
     if checkpoint_path is None:
-        checkpoint_path = find_checkpoint_path()
+        try:
+            checkpoint_path = find_checkpoint_path()
+        except Exception as e:
+            return None, device, device_info, str(e)
         
     if checkpoint_path is None or not os.path.exists(checkpoint_path):
         err_msg = (
             "Model checkpoint not found. Please ensure 'pressurevision_exp3_best.pth' "
-            "is placed inside the 'models/' directory."
+            "is placed inside the 'models/' directory or accessible via Hugging Face."
         )
         return None, device, device_info, err_msg
 

@@ -5,3 +5,4 @@ timm
 Pillow
 numpy
 matplotlib
+huggingface_hub==0.36.2
