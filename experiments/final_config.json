@@ -1,0 +1,58 @@
+{
+  "project": "PressureVision AI",
+  "best_experiment": "Exp_C1_Regularized_Dropout0.35",
+  "description": "Fine-Tuning Experiment: Tuned dropout 0.35, weight decay 1.2e-4 with augmented dataset and Focal Loss",
+  "architecture": {
+    "convnext_backbone": "convnext_tiny.fb_in22k_ft_in1k",
+    "swin_backbone": "swin_tiny_patch4_window7_224.ms_in1k",
+    "fusion": "Adaptive Gated Feature Fusion",
+    "fusion_dim": 512,
+    "gate_hidden_dim": 256,
+    "dropout": 0.35,
+    "classes": [
+      "Invalid",
+      "SDTI",
+      "Stage_I",
+      "Stage_II",
+      "Stage_III",
+      "Stage_IV",
+      "Unstageable"
+    ]
+  },
+  "training_hyperparameters": {
+    "optimizer": "AdamW",
+    "learning_rate": 0.0002,
+    "weight_decay": 0.00012,
+    "scheduler": "CosineAnnealingLR",
+    "epochs": 40,
+    "batch_size": 32,
+    "loss_function": "FocalLoss(gamma=1.5, class_weighted=True)",
+    "data_expansion": "5.0x (8,045 samples across clean, hflip, +/-8 deg rotation, subtle lighting)"
+  },
+  "best_validation_results": {
+    "val_macro_f1_percent": 86.35131715535829,
+    "val_accuracy_percent": 85.79710144927536
+  },
+  "test_results_comparison": {
+    "baseline": {
+      "accuracy_percent": 79.24,
+      "macro_precision_percent": 81.31,
+      "macro_recall_percent": 80.89,
+      "macro_f1_percent": 80.62,
+      "weighted_f1_percent": 79.08,
+      "balanced_accuracy_percent": 80.89
+    },
+    "retrained": {
+      "accuracy_percent": 81.57894736842105,
+      "macro_precision_percent": 82.58713504895485,
+      "macro_recall_percent": 83.07113231405836,
+      "macro_f1_percent": 82.7462311613716,
+      "weighted_f1_percent": 81.41696294067478,
+      "balanced_accuracy_percent": 83.07113231405836,
+      "roc_auc_macro": 0.9604996208126673
+    },
+    "delta_accuracy_percent": 2.3389473684210516,
+    "delta_macro_f1_percent": 2.1262311613715945,
+    "delta_weighted_f1_percent": 2.3369629406747805
+  }
+}

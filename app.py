@@ -7,7 +7,7 @@ Advanced Deep Learning Decision-Support System:
 - 7-Class NPUAP/EPUAP Staging Classification
 - Top Navigation Bar (No Sidebar) & Dark Glassmorphic Theme
 
-Model Checkpoint: pressurevision_exp3_best.pth (56,657,121 parameters | 79.53% Benchmark Test Accuracy)
+Model Checkpoint: pressurevision_exp3_best.pth (56,657,121 parameters | 81.58% Benchmark Test Accuracy | Macro F1: 82.75%)
 """
 
 import os
@@ -527,7 +527,7 @@ with tab_inspect:
         
         if selected_sample_key != "Select a reference case..." and valid_samples[selected_sample_key] is not None:
             sample_file_path = valid_samples[selected_sample_key]
-            if st.button("Load Reference Case", use_container_width=True):
+            if st.button("Load Reference Case", width="stretch"):
                 try:
                     s_img = Image.open(sample_file_path)
                     st.session_state.uploaded_image = s_img
@@ -547,9 +547,9 @@ with tab_inspect:
         # Action Toolbar
         c_btn1, c_btn2, c_space = st.columns([1.6, 1.2, 3])
         with c_btn1:
-            run_pred = st.button("🔬 Analyze & Stage Wound", type="primary", use_container_width=True)
+            run_pred = st.button("🔬 Analyze & Stage Wound", type="primary", width="stretch")
         with c_btn2:
-            run_reset = st.button("🔄 Clear Analysis", type="secondary", use_container_width=True)
+            run_reset = st.button("🔄 Clear Analysis", type="secondary", width="stretch")
             
         if run_reset:
             st.session_state.uploaded_image = None
@@ -574,7 +574,7 @@ with tab_inspect:
 
         with col_img_view:
             render_html('<div class="img-preview-card"><div style="font-size:0.88rem;font-weight:700;color:#38BDF8;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:0.8rem;">📷 Wound Image Inspection</div>')
-            st.image(curr_image, use_container_width=True)
+            st.image(curr_image, width="stretch")
             
             w_px, h_px = curr_image.size
             fn = st.session_state.image_filename or "clinical_upload.jpg"
@@ -741,13 +741,13 @@ with tab_inspect:
                         c_cam_p1, c_cam_p2, c_cam_p3 = st.columns(3)
                         with c_cam_p1:
                             st.caption(f"1. Original Photograph ({w_px} × {h_px} px)")
-                            st.image(curr_image, use_container_width=True)
+                            st.image(curr_image, width="stretch")
                         with c_cam_p2:
                             st.caption("2. ConvNeXt Heatmap (Stage 3)")
-                            st.image(instant_cam["colored_heatmap_pil"], use_container_width=True)
+                            st.image(instant_cam["colored_heatmap_pil"], width="stretch")
                         with c_cam_p3:
                             st.caption(f"3. Overlay ({instant_cam['predicted_class']})")
-                            st.image(instant_cam["overlay_pil"], use_container_width=True)
+                            st.image(instant_cam["overlay_pil"], width="stretch")
                         st.caption("💡 *For custom target class explanations, opacity tuning, and colormaps, open the **🔍 Explainability (Grad-CAM)** tab above.*")
                     except Exception as e_cam:
                         st.warning(f"Grad-CAM preview notice: {str(e_cam)}")
@@ -814,13 +814,14 @@ with tab_arch:
         </div>
 
         <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;">
-            <div style="font-size:0.88rem;font-weight:700;color:#F8FAFC;margin-bottom:0.5rem;">📊 Benchmark Test Results (Experiment 3 Checkpoint)</div>
+            <div style="font-size:0.88rem;font-weight:700;color:#F8FAFC;margin-bottom:0.5rem;">📊 Benchmark Test Results (Retrained Best Model: Exp_C1)</div>
             <div style="display:flex;gap:2rem;flex-wrap:wrap;font-size:0.85rem;color:#94A3B8;">
                 <div>Test Set Size: <strong style="color:#F8FAFC;">342 Samples</strong></div>
-                <div>Classification Accuracy: <strong style="color:#10B981;">79.53%</strong></div>
-                <div>Macro Precision: <strong style="color:#38BDF8;">81.89%</strong></div>
-                <div>Macro Recall: <strong style="color:#38BDF8;">81.28%</strong></div>
-                <div>Macro F1-Score: <strong style="color:#38BDF8;">80.99%</strong></div>
+                <div>Classification Accuracy: <strong style="color:#10B981;">81.58%</strong></div>
+                <div>Macro Precision: <strong style="color:#38BDF8;">82.59%</strong></div>
+                <div>Macro Recall: <strong style="color:#38BDF8;">83.07%</strong></div>
+                <div>Macro F1-Score: <strong style="color:#38BDF8;">82.75%</strong></div>
+                <div>Weighted F1-Score: <strong style="color:#34D399;">81.42%</strong></div>
             </div>
         </div>
     </div>
@@ -898,7 +899,7 @@ with tab_explain:
             
         with c_cam_btn:
             st.markdown("<div style='height: 1.7rem;'></div>", unsafe_allow_html=True)
-            compute_cam_clicked = st.button("⚡ Compute Grad-CAM", type="primary", use_container_width=True)
+            compute_cam_clicked = st.button("⚡ Compute Grad-CAM", type="primary", width="stretch")
 
         # Parse target class
         if sel_target.startswith("Predicted Class"):
@@ -959,7 +960,7 @@ with tab_explain:
                 <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1rem;text-align:center;">
                     <div style="font-size:0.85rem;font-weight:700;color:#94A3B8;text-transform:uppercase;margin-bottom:0.6rem;">1. Original RGB Input</div>
                 """)
-                st.image(cam_img, use_container_width=True)
+                st.image(cam_img, width="stretch")
                 w_px, h_px = cam_img.size
                 render_html(f"""
                     <div style="font-size:0.75rem;color:#64748B;margin-top:0.5rem;">{w_px} &times; {h_px} px &bull; Input Resolution</div>
@@ -971,7 +972,7 @@ with tab_explain:
                 <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.08);border-radius:14px;padding:1rem;text-align:center;">
                     <div style="font-size:0.85rem;font-weight:700;color:#38BDF8;text-transform:uppercase;margin-bottom:0.6rem;">2. ConvNeXt Activation Heatmap</div>
                 """)
-                st.image(res["colored_heatmap_pil"], use_container_width=True)
+                st.image(res["colored_heatmap_pil"], width="stretch")
                 render_html(f"""
                     <div style="font-size:0.75rem;color:#64748B;margin-top:0.5rem;">Normalized [0.0, 1.0] &bull; Colormap: <code>{cam_cmap}</code></div>
                 </div>
@@ -982,7 +983,7 @@ with tab_explain:
                 <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(56,189,248,0.2);border-radius:14px;padding:1rem;text-align:center;">
                     <div style="font-size:0.85rem;font-weight:700;color:#34D399;text-transform:uppercase;margin-bottom:0.6rem;">3. Blended Overlay</div>
                 """)
-                st.image(res["overlay_pil"], use_container_width=True)
+                st.image(res["overlay_pil"], width="stretch")
                 render_html(f"""
                     <div style="font-size:0.75rem;color:#64748B;margin-top:0.5rem;">Alpha blend (α = {cam_opacity:.2f}) &bull; Focused spatial regions</div>
                 </div>
@@ -1058,8 +1059,8 @@ with tab_specs:
             </div>
             <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;">
                 <div style="font-size:0.75rem;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;">Benchmark Test Accuracy</div>
-                <div style="font-size:1.4rem;font-weight:800;color:#10B981;margin-top:0.2rem;">79.53%</div>
-                <div style="font-size:0.82rem;color:#64748B;margin-top:0.4rem;">Macro F1: 80.99% | Precision: 81.89%</div>
+                <div style="font-size:1.4rem;font-weight:800;color:#10B981;margin-top:0.2rem;">81.58%</div>
+                <div style="font-size:0.82rem;color:#64748B;margin-top:0.4rem;">Macro F1: 82.75% | Precision: 82.59% | Recall: 83.07%</div>
             </div>
             <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;">
                 <div style="font-size:0.75rem;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;">Inference Resolution</div>
@@ -1096,6 +1097,6 @@ render_html("""
 render_html("""
 <div class="app-footer">
     <strong>PressureVision™ AI</strong> &bull; Clinical Pressure Ulcer Staging Intelligence &bull; Powered by ConvNeXt-Tiny & Swin-Tiny Hybrid Architecture<br>
-    Model Checkpoint: <code>pressurevision_exp3_best.pth</code> (56.6M Parameters | 79.53% Benchmark Test Accuracy)
+    Model Checkpoint: <code>pressurevision_exp3_best.pth</code> (56.6M Parameters | 81.58% Benchmark Test Accuracy | Macro F1: 82.75%)
 </div>
 """)

@@ -1,0 +1,45 @@
+{
+  "seed": 42,
+  "total_scanned_images": 2300,
+  "conflicting_images_excluded": 4,
+  "clean_images": 2296,
+  "unique_content_groups": 2259,
+  "splits": {
+    "train": {
+      "total": 1609,
+      "class_distribution": {
+        "Stage_IV": 271,
+        "Stage_II": 265,
+        "Stage_III": 240,
+        "Invalid": 212,
+        "SDTI": 211,
+        "Unstageable": 211,
+        "Stage_I": 199
+      }
+    },
+    "val": {
+      "total": 345,
+      "class_distribution": {
+        "Stage_IV": 58,
+        "Stage_II": 57,
+        "Stage_III": 52,
+        "SDTI": 46,
+        "Invalid": 45,
+        "Unstageable": 45,
+        "Stage_I": 42
+      }
+    },
+    "test": {
+      "total": 342,
+      "class_distribution": {
+        "Stage_IV": 60,
+        "Stage_II": 57,
+        "Stage_III": 51,
+        "Invalid": 44,
+        "Unstageable": 44,
+        "SDTI": 43,
+        "Stage_I": 43
+      }
+    }
+  }
+}

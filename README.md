@@ -107,13 +107,12 @@ The model classifies wound images into 7 standard staging classes:
 ## 5. Model Parameters & Performance
 
 - **Total Architecture Parameters**: $56,657,121$
-- **Trained Model Checkpoint**: `pressurevision_exp3_best.pth` (Selected by lowest validation loss: $0.6792$)
 - **Official Untouched Test Set Evaluation**:
-  - **Accuracy**: `79.53%` (272 / 342 correct predictions)
-  - **Macro Precision**: `81.89%`
-  - **Macro Recall**: `81.28%`
-  - **Macro F1-Score**: `80.99%`
-  - **Weighted F1-Score**: `79.44%`
+  - **Accuracy**: `81.58%` (279 / 342 correct predictions)
+  - **Macro Precision**: `82.59%`
+  - **Macro Recall**: `83.07%`
+  - **Macro F1-Score**: `82.75%`
+  - **Weighted F1-Score**: `81.42%`
 
 *Note: All performance figures reflect the project's untouched benchmark test set. No claims of clinical accuracy or regulatory medical validation are made.*
 
