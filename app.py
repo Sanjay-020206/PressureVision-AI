@@ -814,7 +814,7 @@ with tab_arch:
         </div>
 
         <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;">
-            <div style="font-size:0.88rem;font-weight:700;color:#F8FAFC;margin-bottom:0.5rem;">📊 Benchmark Test Results (Retrained Best Model: Exp_C1)</div>
+            <div style="font-size:0.88rem;font-weight:700;color:#F8FAFC;margin-bottom:0.5rem;">📊 Benchmark Test Results (pressurevision_exp3_best.pth)</div>
             <div style="display:flex;gap:2rem;flex-wrap:wrap;font-size:0.85rem;color:#94A3B8;">
                 <div>Test Set Size: <strong style="color:#F8FAFC;">342 Samples</strong></div>
                 <div>Classification Accuracy: <strong style="color:#10B981;">93.57%</strong></div>
