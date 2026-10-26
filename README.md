@@ -145,7 +145,7 @@ PressureVisionAI/
 ├── README.md                  # Comprehensive project documentation
 │
 ├── models/
-│   ├── pressurevision_retrained_best.pth # Retrained model checkpoint (56.6M params)
+│   ├── pressurevision_exp3_best.pth      # Trained checkpoint (56.6M params)
 │   └── pressurevision_exp3_config.json  # Architecture & training hyperparameters
 │
 └── Dataset/                   # Benchmark dataset reference and test samples
@@ -195,9 +195,9 @@ pip install -r requirements.txt
 
 Ensure that the trained model checkpoint is located at:
 ```
-models/pressurevision_retrained_best.pth
+models/pressurevision_exp3_best.pth
 ```
-*(The application automatically loads `models/pressurevision_retrained_best.pth` or downloads it from Hugging Face Hub if running on Streamlit Cloud).*
+*(The application also automatically falls back to `PressureVisionAI_Experiment3_BestModel/pressurevision_exp3_best.pth` if present).*
 
 ---
 

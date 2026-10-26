@@ -3,7 +3,7 @@
 **Project:** PressureVision AI - Dual-Backbone Hybrid Multimodal Pressure Ulcer Staging  
 **Architecture:** ConvNeXt-Tiny + Swin-Tiny + Learnable Channel-Wise Adaptive Gated Fusion  
 **Total Parameters:** 56,657,121 (100% Strict Match)  
-**Primary Checkpoint:** [`models/pressurevision_retrained_best.pth`](file:///e:/Pressure_ulcer_class/models/pressurevision_retrained_best.pth)  
+**Primary Checkpoint:** [`models/pressurevision_exp3_best.pth`](file:///e:/Pressure_ulcer_class/models/pressurevision_exp3_best.pth)  
 **Evaluation Dataset:** Untouched Test Split (342 clinical benchmark images across 7 staging classes)  
 
 ---
@@ -68,7 +68,7 @@ Unstageable        0     0        0         0          0         2           42
 ---
 
 ## 5. Checkpoint & Deployment Artifacts
-- **Model Checkpoint**: [`models/pressurevision_retrained_best.pth`](file:///e:/Pressure_ulcer_class/models/pressurevision_retrained_best.pth)
+- **Model Checkpoint**: [`models/pressurevision_exp3_best.pth`](file:///e:/Pressure_ulcer_class/models/pressurevision_exp3_best.pth)
 - **Architecture Configuration**: [`models/pressurevision_exp3_config.json`](file:///e:/Pressure_ulcer_class/models/pressurevision_exp3_config.json)
 - **Report Preview Deliverables**: [`experiments/report_preview/retraining_report.md`](file:///e:/Pressure_ulcer_class/experiments/report_preview/retraining_report.md)
 - **Predictions Export**: [`experiments/report_preview/retrained_predictions.csv`](file:///e:/Pressure_ulcer_class/experiments/report_preview/retrained_predictions.csv)

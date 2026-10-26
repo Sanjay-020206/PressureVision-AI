@@ -92,7 +92,6 @@ def find_checkpoint_path() -> str:
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
     candidates = [
-        os.path.join(base_dir, "models", "pressurevision_retrained_best.pth"),
         os.path.join(base_dir, "models", "pressurevision_exp3_best.pth"),
         os.path.join(base_dir, "PressureVisionAI_Experiment3_BestModel", "pressurevision_exp3_best.pth")
     ]
@@ -106,30 +105,17 @@ def find_checkpoint_path() -> str:
         "Sanjay020206/PressureVision-AI"
     )
 
-    checkpoint_filename = os.getenv(
-        "HF_MODEL_FILENAME",
-        "pressurevision_retrained_best.pth"
-    )
-
     try:
         return hf_hub_download(
             repo_id=repo_id,
-            filename=checkpoint_filename,
+            filename="pressurevision_exp3_best.pth",
             repo_type="model"
         )
     except Exception as e:
-        # Fallback to exp3 if retrained download fails
-        try:
-            return hf_hub_download(
-                repo_id=repo_id,
-                filename="pressurevision_exp3_best.pth",
-                repo_type="model"
-            )
-        except Exception:
-            raise RuntimeError(
-                f"Unable to download the PressureVision AI checkpoint "
-                f"from Hugging Face repository {repo_id}: {e}"
-            ) from e
+        raise RuntimeError(
+            f"Unable to download the PressureVision AI checkpoint "
+            f"from Hugging Face repository {repo_id}: {e}"
+        ) from e
 
 
 def get_inference_transform() -> transforms.Compose:
@@ -165,7 +151,7 @@ def load_model(checkpoint_path: Optional[str] = None) -> Tuple[Optional[Pressure
         
     if checkpoint_path is None or not os.path.exists(checkpoint_path):
         err_msg = (
-            "Model checkpoint not found. Please ensure 'pressurevision_retrained_best.pth' "
+            "Model checkpoint not found. Please ensure 'pressurevision_exp3_best.pth' "
             "is placed inside the 'models/' directory or accessible via Hugging Face."
         )
         return None, device, device_info, err_msg
