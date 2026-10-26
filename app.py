@@ -11,6 +11,11 @@ Model Checkpoint: pressurevision_exp3_best.pth (56,657,121 parameters | 93.57% B
 """
 
 import os
+
+# Stabilize OpenMP runtime and prevent memory allocator crashes on cloud containers
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+
 import time
 import re
 import streamlit as st
@@ -452,7 +457,7 @@ render_html(nav_html)
 # Halt if model loading failed
 if error_msg:
     st.error(f"⚠️ **Model Initialization Failure:** {error_msg}")
-    st.info("Please verify that `pressurevision_exp3_best.pth` exists in the `models/` directory.")
+    st.info("Please verify that `pressurevision_exp3_best.pth` exists in the `models/` directory or is accessible from the Hugging Face repository `Sanjay020206/PressureVision-AI`.")
     st.stop()
 
 

@@ -1,8 +1,10 @@
+--extra-index-url https://download.pytorch.org/whl/cpu
+
 streamlit
 torch
 torchvision
 timm
 Pillow
-numpy
+numpy<2.0.0
 matplotlib
 huggingface_hub==0.36.2

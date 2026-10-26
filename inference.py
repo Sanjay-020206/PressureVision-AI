@@ -9,12 +9,19 @@ Inference engine for Pressure Ulcer Stage Classification:
 """
 
 import os
+
+# Stabilize OpenMP runtime and prevent memory allocator crashes on cloud containers
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("KMP_DUPLICATE_LIB_OK", "TRUE")
+
 from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 from PIL import Image
 import torch
 import torch.nn.functional as F
 import torchvision.transforms as transforms
+import matplotlib
+matplotlib.use("Agg")  # Non-interactive backend to prevent GUI/C-allocator crashes on headless cloud servers
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 from huggingface_hub import hf_hub_download
