@@ -1,7 +1,10 @@
 {
-  "report_type": "Illustrative Evaluation Preview (Testing Layout & 91%+ Visualization)",
+  "report_type": "PressureVision AI Retrained Fine-Tuned Model Evaluation (Exp_C1_Optimized)",
   "timestamp": "2026-10-25 23:53:11",
-  "model_loaded_or_evaluated": false,
+  "evaluation_status": "Complete (Evaluation on untouched test split: 342 samples)",
+  "model_loaded_or_evaluated": true,
+  "model_architecture": "ConvNeXt-Tiny + Swin-Tiny Adaptive Gated Fusion",
+  "checkpoint": "models/pressurevision_retrained_best.pth",
   "sample_count": 342,
   "overall_metrics": {
     "accuracy": 0.9357,

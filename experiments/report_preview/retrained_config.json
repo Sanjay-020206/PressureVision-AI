@@ -1,0 +1,36 @@
+{
+  "project": "PressureVision AI",
+  "checkpoint_file": "models/pressurevision_retrained_best.pth",
+  "experiment_name": "Exp_C1_Optimized_Fusion_93.57",
+  "description": "Optimized ConvNeXt-Tiny + Swin-Tiny Adaptive Gated Fusion with class-weighted Focal Loss and Cosine Annealing",
+  "architecture": {
+    "convnext_backbone": "convnext_tiny.fb_in22k_ft_in1k",
+    "swin_backbone": "swin_tiny_patch4_window7_224",
+    "fusion_type": "adaptive_gated_fusion",
+    "fusion_dimension": 512,
+    "classifier_layers": [
+      512,
+      256,
+      7
+    ],
+    "dropout_rate": 0.35
+  },
+  "training": {
+    "epochs": 40,
+    "batch_size": 32,
+    "learning_rate": 0.0003,
+    "optimizer": "AdamW",
+    "weight_decay": 0.00012,
+    "loss_function": "FocalLoss",
+    "focal_gamma": 1.5,
+    "scheduler": "CosineAnnealingLR",
+    "best_epoch": 38
+  },
+  "evaluation": {
+    "test_samples": 342,
+    "test_accuracy": 0.9357,
+    "test_macro_f1": 0.9394,
+    "test_weighted_f1": 0.936,
+    "test_roc_auc_macro": 0.9991
+  }
+}
