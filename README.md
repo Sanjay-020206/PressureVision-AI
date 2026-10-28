@@ -145,7 +145,7 @@ PressureVisionAI/
 ├── README.md                  # Comprehensive project documentation
 │
 ├── models/
-│   ├── pressurevision_exp3_best.pth      # Trained checkpoint (56.6M params)
+│   ├── retrained_best.pth                # Trained checkpoint (56.6M params)
 │   └── pressurevision_exp3_config.json  # Architecture & training hyperparameters
 │
 └── Dataset/                   # Benchmark dataset reference and test samples
@@ -195,7 +195,7 @@ pip install -r requirements.txt
 
 Ensure that the trained model checkpoint is located at:
 ```
-models/pressurevision_exp3_best.pth
+models/retrained_best.pth
 ```
 *(The application also automatically falls back to `PressureVisionAI_Experiment3_BestModel/pressurevision_exp3_best.pth` if present).*
 

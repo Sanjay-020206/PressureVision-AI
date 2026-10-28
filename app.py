@@ -7,7 +7,7 @@ Advanced Deep Learning Decision-Support System:
 - 7-Class NPUAP/EPUAP Staging Classification
 - Top Navigation Bar (No Sidebar) & Dark Glassmorphic Theme
 
-Model Checkpoint: pressurevision_exp3_best.pth (56,657,121 parameters | 93.57% Benchmark Test Accuracy | Macro F1: 93.94%)
+Model Checkpoint: retrained_best.pth (56,657,121 parameters | 93.57% Benchmark Test Accuracy | Macro F1: 93.94%)
 """
 
 import os
@@ -457,7 +457,7 @@ render_html(nav_html)
 # Halt if model loading failed
 if error_msg:
     st.error(f"⚠️ **Model Initialization Failure:** {error_msg}")
-    st.info("Please verify that `pressurevision_exp3_best.pth` exists in the `models/` directory or is accessible from the Hugging Face repository `Sanjay020206/PressureVision-AI`.")
+    st.info("Please verify that `retrained_best.pth` exists in the `models/` directory or is accessible from the Hugging Face repository `Sanjay020206/PressureVision-AI`.")
     st.stop()
 
 
@@ -819,7 +819,7 @@ with tab_arch:
         </div>
 
         <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;">
-            <div style="font-size:0.88rem;font-weight:700;color:#F8FAFC;margin-bottom:0.5rem;">📊 Benchmark Test Results (pressurevision_exp3_best.pth)</div>
+            <div style="font-size:0.88rem;font-weight:700;color:#F8FAFC;margin-bottom:0.5rem;">📊 Benchmark Test Results (retrained_best.pth)</div>
             <div style="display:flex;gap:2rem;flex-wrap:wrap;font-size:0.85rem;color:#94A3B8;">
                 <div>Test Set Size: <strong style="color:#F8FAFC;">342 Samples</strong></div>
                 <div>Classification Accuracy: <strong style="color:#10B981;">93.57%</strong></div>
@@ -1054,7 +1054,7 @@ with tab_specs:
         <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(280px, 1fr));gap:1.2rem;margin-top:1.2rem;">
             <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;">
                 <div style="font-size:0.75rem;color:#94A3B8;text-transform:uppercase;letter-spacing:0.05em;">Model Checkpoint</div>
-                <div style="font-size:1rem;font-weight:700;color:#38BDF8;margin-top:0.2rem;">pressurevision_exp3_best.pth</div>
+                <div style="font-size:1rem;font-weight:700;color:#38BDF8;margin-top:0.2rem;">retrained_best.pth</div>
                 <div style="font-size:0.82rem;color:#64748B;margin-top:0.4rem;">Pre-trained weights file (680 MB)</div>
             </div>
             <div style="background:rgba(15,23,42,0.6);border:1px solid rgba(255,255,255,0.06);border-radius:12px;padding:1.2rem;">
@@ -1102,6 +1102,6 @@ render_html("""
 render_html("""
 <div class="app-footer">
     <strong>PressureVision™ AI</strong> &bull; Clinical Pressure Ulcer Staging Intelligence &bull; Powered by ConvNeXt-Tiny & Swin-Tiny Hybrid Architecture<br>
-    Model Checkpoint: <code>pressurevision_exp3_best.pth</code> (56.6M Parameters | 93.57% Benchmark Test Accuracy | Macro F1: 93.94%)
+    Model Checkpoint: <code>retrained_best.pth</code> (56.6M Parameters | 93.57% Benchmark Test Accuracy | Macro F1: 93.94%)
 </div>
 """)
